@@ -1,6 +1,6 @@
 using System;
-using System;
 using System.Collections;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -10,26 +10,76 @@ public class TimerManager : MonoBehaviour
     private float currentTime;
     private Action savedCallback; // Salviamo la callback originale in caso di pausa
     private Coroutine timerCoroutine;
+    private Coroutine stopwatchCoroutine;
+
+    public float ElapsedTime { get; private set; }
+
+    /// <summary>
+    /// Avvia un cronometro crescente usato dalla modalità a numero fisso di tile.
+    /// </summary>
+    public void StartStopwatch()
+    {
+        StopStopwatch();
+        ElapsedTime = 0f;
+        UpdateStopwatchText();
+        stopwatchCoroutine = StartCoroutine(RunStopwatch());
+    }
+
+    /// <summary>
+    /// Ferma il cronometro e restituisce il tempo impiegato in secondi.
+    /// </summary>
+    public float StopStopwatch()
+    {
+        if (stopwatchCoroutine != null)
+        {
+            StopCoroutine(stopwatchCoroutine);
+            stopwatchCoroutine = null;
+        }
+
+        UpdateStopwatchText();
+        return ElapsedTime;
+    }
+
+    private IEnumerator RunStopwatch()
+    {
+        while (true)
+        {
+            ElapsedTime += Time.deltaTime;
+            UpdateStopwatchText();
+            yield return null;
+        }
+    }
+
+    private void UpdateStopwatchText()
+    {
+        if (timerText != null)
+        {
+            string updateText = ElapsedTime.ToString("F2", CultureInfo.InvariantCulture);
+            timerText.text = updateText;
+        }
+    }
 
     public void UpdateTimerText(float time)
     {
         // Usiamo Mathf.Max per evitare che mostri valori negativi (es. -0.01) alla fine
         if (timerText != null)
         {
-            timerText.text = Mathf.Max(0, time).ToString("F2");
+            timerText.text = Mathf.Max(0, time).ToString("F2", CultureInfo.InvariantCulture);
         }
     }
 
-    Coroutine stopCor;
+    private Coroutine stopCoroutine;
+
     public void StopTimerFor(float timeToStop)
     {
-        if (stopCor != null)
+        StopTimer();
+
+        if (stopCoroutine != null)
         {
-            StopCoroutine(stopCor);
-            stopCor = null;
+            StopCoroutine(stopCoroutine);
         }
 
-        stopCor = StartCoroutine(StopTimerAfterCoroutine(timeToStop));
+        stopCoroutine = StartCoroutine(ResumeTimerAfterDelay(timeToStop));
     }
 
     public void StopTimer()
@@ -41,16 +91,10 @@ public class TimerManager : MonoBehaviour
         }
     }
 
-    public IEnumerator StopTimerAfterCoroutine(float timeToStop)
+    private IEnumerator ResumeTimerAfterDelay(float timeToStop)
     {
-        if (timerCoroutine != null)
-        {
-            StopCoroutine(timerCoroutine);
-            timerCoroutine = null;
-        }
-
         yield return new WaitForSeconds(timeToStop);
-
+        stopCoroutine = null;
         PlayTimerAfterStop();
     }
 
@@ -58,11 +102,16 @@ public class TimerManager : MonoBehaviour
 
     public void StartTimer(float duration, Action callback)
     {
-        StopTimerFor(0);
+        StopTimer();
 
-        // Salviamo l'azione da compiere alla fine
+        if (stopCoroutine != null)
+        {
+            StopCoroutine(stopCoroutine);
+            stopCoroutine = null;
+        }
+
         savedCallback = callback;
-        currentTime = duration;
+        currentTime = Mathf.Max(0, duration);
 
         timerCoroutine = StartCoroutine(RunTimer());
     }
