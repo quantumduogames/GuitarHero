@@ -7,8 +7,9 @@ using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 using System.Globalization;
+using System;
 
-public class GameManager : MonoBehaviour
+public class MinigameManager : MonoBehaviour
 {
     [Header("References")]
     public TimerManager timerManager;
@@ -35,6 +36,11 @@ public class GameManager : MonoBehaviour
     [Header("Score & UI")]
     [SerializeField] private TMP_Text recordText;
     [SerializeField] private TMP_Text tilesCountScore;
+    [SerializeField] GameObject gameButton, gameHeader;
+
+    [Header("Countdown UI")]
+    [SerializeField] private GameObject counterPanel; // Il pannello 'CounterPnl'
+    [SerializeField] private TMP_Text txtCount;       // Il testo 'txtCount'
 
     private const string RecordKeyPrefix = "ColorGameBestTime_";
 
@@ -50,7 +56,7 @@ public class GameManager : MonoBehaviour
     public ExplodingObj[] availableTiles;
     public ExplodingObj[] currentGameTiles;
 
-    void Start()
+    public void StartGame()
     {
         spawnedTiles = 0;
         clickedTiles = 0;
@@ -67,8 +73,54 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        timerManager.StartStopwatch();
-        spawnCoroutine = StartCoroutine(SpawnRoutine());
+        // Attiva l'interfaccia di gioco
+        if (gameButton != null) gameButton.SetActive(true);
+        if (gameHeader != null) gameHeader.SetActive(true);
+
+        // Ferma eventuali routine attive e avvia il conto alla rovescia
+        if (spawnCoroutine != null) StopCoroutine(spawnCoroutine);
+        StartCoroutine(CountdownRoutine());
+    }
+
+    /// <summary>
+    /// Resetta completamente lo stato del gioco e avvia una nuova partita da zero.
+    /// </summary>
+    public void RestartGame()
+    {
+        gameButton.SetActive(true);
+        gameHeader.SetActive(true);
+
+        // 1. Ferma eventuali Coroutine di spawn ancora attive
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+        }
+
+        // 2. Distruggi tutti i blocchi ancora presenti in scena
+        foreach (GameObject block in activeBlocks)
+        {
+            if (block != null)
+            {
+                Destroy(block);
+            }
+        }
+        activeBlocks.Clear();
+
+        // 3. Resetta lo stato di GameOver e i contatori di gioco
+        isGameOver = false;
+        elapsedTime = 0f;
+        spawnedTiles = 0;
+        clickedTiles = 0;
+
+        // 4. Resetta e riavvia il TimerManager
+        if (timerManager != null)
+        {
+            timerManager.StopStopwatch(); // Resetta lo stopwatch esistente
+        }
+
+        // 5. Fa ripartire la sessione fresca
+        StartGame();
     }
 
     private void CreateLimitLine()
@@ -124,7 +176,7 @@ public class GameManager : MonoBehaviour
         int tilesToSelect = Mathf.Min(4, availableTiles.Length); // Limitiamo a 4 per i bottoni
         while (selected.Count < tilesToSelect)
         {
-            ExplodingObj randomTile = availableTiles[Random.Range(0, availableTiles.Length)];
+            ExplodingObj randomTile = availableTiles[UnityEngine.Random.Range(0, availableTiles.Length)];
             if (!selected.Contains(randomTile))
             {
                 selected.Add(randomTile);
@@ -244,7 +296,7 @@ public class GameManager : MonoBehaviour
         if (spawnPoint == null || currentGameTiles == null || currentGameTiles.Length == 0) return;
 
         // 1. Pesca una SingleTile a caso
-        ExplodingObj selectedTile = currentGameTiles[Random.Range(0, currentGameTiles.Length)];
+        ExplodingObj selectedTile = currentGameTiles[UnityEngine.Random.Range(0, currentGameTiles.Length)];
         if (selectedTile.tilePrefab == null) return;
 
         // 2. ISTANZIA DIRETTAMENTE IL PREFAB PRONTO
@@ -335,7 +387,11 @@ public class GameManager : MonoBehaviour
 
     private float GetBestTime()
     {
-        return PlayerPrefs.GetFloat(RecordKey, float.MaxValue);
+        float bestTime = ScoreManager.Instance != null
+        ? ScoreManager.Instance.GetBestTime(targetTiles)
+        : float.MaxValue;
+
+        return bestTime;
     }
 
     private void UpdateRecordText(float recordTime)
@@ -347,26 +403,80 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public static Action<float> ? OnGameCompleted;
     private void CompleteGame()
     {
         isGameOver = true;
         if (spawnCoroutine != null) StopCoroutine(spawnCoroutine);
 
         float completedTime = timerManager != null ? timerManager.StopStopwatch() : elapsedTime;
-        float previousRecord = GetBestTime();
-        bool isNewRecord = completedTime < previousRecord;
 
-        if (isNewRecord)
+        FinalExplosion();
+
+        // Salva il tempo usando lo ScoreManager
+        if (ScoreManager.Instance != null)
         {
-            PlayerPrefs.SetFloat(RecordKey, completedTime);
-            PlayerPrefs.Save();
-            previousRecord = completedTime;
+            ScoreManager.Instance.AddScore(targetTiles, completedTime);
         }
 
-        UpdateRecordText(previousRecord);
-        Debug.Log(isNewRecord
-            ? $"<color=green>VITTORIA! Completato in {completedTime:F2}s: Nuovo Record!</color>"
-            : $"VITTORIA! Completato in {completedTime:F2}s. Record attuale: {previousRecord:F2}s.");
+        UpdateRecordText(GetBestTime());
+
+        // Notifica la UI che il gioco è finito passando il tempo impiegato
+        OnGameCompleted?.Invoke(completedTime);
+    }
+
+    void FinalExplosion()
+    {
+        foreach (GameObject block in activeBlocks)
+        {
+            if (block != null)
+            {
+                ColorDataRuntime data = block.GetComponent<ColorDataRuntime>();
+                if (data != null && ExplosionManager.Instance != null)
+                {
+                    ExplosionManager.Instance.SpawnJuicyExplosion(block.transform.position, data.color);
+                }
+                Destroy(block);
+            }
+        }
+        activeBlocks.Clear();
+    }
+
+    /// <summary>
+    /// Coroutine che gestisce il conto alla rovescia 3.. 2.. 1.. GO!
+    /// </summary>
+    private IEnumerator CountdownRoutine()
+    {
+        // 1. Mostra il pannello del conto alla rovescia
+        if (counterPanel != null) counterPanel.SetActive(true);
+
+        // 3
+        if (txtCount != null) txtCount.text = "03";
+        yield return new WaitForSeconds(1f);
+
+        // 2
+        if (txtCount != null) txtCount.text = "02";
+        yield return new WaitForSeconds(1f);
+
+        // 1
+        if (txtCount != null) txtCount.text = "01";
+        yield return new WaitForSeconds(1f);
+
+        // GO!
+        if (txtCount != null) txtCount.text = "GO!";
+        yield return new WaitForSeconds(0.5f); // Resta visibile per mezzo secondo
+
+        // 2. Nascondi il pannello
+        if (counterPanel != null) counterPanel.SetActive(false);
+
+        // 3. FAI PARTIRE IL GIOCO VERO E PROPRIO
+        if (timerManager != null)
+        {
+            timerManager.StartStopwatch();
+        }
+
+        spawnCoroutine = StartCoroutine(SpawnRoutine());
     }
 }
 
