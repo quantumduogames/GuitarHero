@@ -6,72 +6,78 @@ public class UIEventManager : MonoBehaviour
 {
     [SerializeField] private GameObject bannersContainer;
 
-    [Header("Global Leaderboard Banners (Simulated)")]
-    [SerializeField] private GameObject worldRecordBanner;   // Banner 1° al Mondo!
-    [SerializeField] private GameObject top5GlobalBanner;   // Banner Top 5 Globale!
-
-    [Header("Local Leaderboard Banners")]
-    [SerializeField] private GameObject recordBanner;       // Banner 1° Locale
-    [SerializeField] private GameObject top5LocalBanner;    // Banner Top 5 Locale
-    [SerializeField] private GameObject retryBanner;        // Banner Vittoria Normale / Retry
+    [Header("Banners")]
+    [SerializeField] private GameObject newRecordBanner;   // Corrisponde a Panel - NewRecord
+    [SerializeField] private GameObject defaultBanner;     // Corrisponde a Panel - Default
 
     [Header("Leaderboards Parent Objects")]
-    [SerializeField] private Transform localLeaderboardContainer;  // Contenitore Padre delle 5 righe Locali
-    [SerializeField] private Transform globalLeaderboardContainer; // Contenitore Padre delle 5 righe Globali
+    [SerializeField] private Transform localLeaderboardContainer;
+    [SerializeField] private Transform localLeaderboardContainerInGame;
+    [SerializeField] private Transform globalLeaderboardContainer;
+    [SerializeField] private Transform globalLeaderboardContainerInGame;
 
     private void OnEnable()
     {
-        MinigameManager.OnGameCompleted += ChooseBannerToShow; 
+        HundredBombsManager.OnGameCompleted += ChooseBannerToShow;
     }
 
     private void OnDisable()
     {
-        MinigameManager.OnGameCompleted -= ChooseBannerToShow; 
+        HundredBombsManager.OnGameCompleted -= ChooseBannerToShow;
+    }
+
+    private void Start()
+    {
+        RefreshLeaderboardsUI();
+    }
+
+    /// <summary>
+    /// Metodo per aggiornare visivamente le classifiche attingendo dai dati salvati o fake.
+    /// </summary>
+    private void RefreshLeaderboardsUI()
+    {
+        if (ScoreManager.Instance == null) return;
+
+        int targetTiles = 100;
+
+        // Popola i dati salvati/iniziali nelle varie leaderboard
+        PopulateLeaderboardUI(localLeaderboardContainer, ScoreManager.Instance.GetLocalTopScores(targetTiles));
+        PopulateLeaderboardUI(localLeaderboardContainerInGame, ScoreManager.Instance.GetLocalTopScores(targetTiles));
+        PopulateLeaderboardUI(globalLeaderboardContainer, ScoreManager.Instance.GetFakeGlobalTopScores(targetTiles));
+        PopulateLeaderboardUI(globalLeaderboardContainerInGame, ScoreManager.Instance.GetFakeGlobalTopScores(targetTiles));
     }
 
     private void ChooseBannerToShow(float completedTime)
     {
-        if (ScoreManager.Instance == null) return; 
+        if (ScoreManager.Instance == null) return;
 
-        HideAllBanners(); 
-        int targetTiles = 100; 
-
+        HideAllBanners();
+        int targetTiles = 100;
+        string playerName = PlayerPrefs.GetString(DataConstDatabase.PlayerName, "Not found");
         // 1. Aggiorna lo ScoreManager col nuovo tempo
-        ScoreManager.Instance.AddScore(targetTiles, completedTime, "You"); 
-        ScoreManager.Instance.AddFakeGlobalScore(targetTiles, completedTime, "You"); 
+        ScoreManager.Instance.AddScore(targetTiles, completedTime, playerName);
+        ScoreManager.Instance.AddFakeGlobalScore(targetTiles, completedTime, playerName);
 
-        // 2. Popola visivamente i 5 elementi nelle due Leaderboard
-        PopulateLeaderboardUI(localLeaderboardContainer, ScoreManager.Instance.GetTopScores(targetTiles)); 
-        PopulateLeaderboardUI(globalLeaderboardContainer, ScoreManager.Instance.GetFakeGlobalTopScores(targetTiles)); 
+        // 2. Rinfresca visivamente i 5 elementi nelle leaderboard con i nuovi dati aggiornati
+        RefreshLeaderboardsUI();
 
-        // 3. Calcola posizioni e attiva il banner idoneo con i relativi testi
-        int globalRank = ScoreManager.Instance.GetFakeGlobalRankForScore(targetTiles, completedTime); 
-        int localRank = ScoreManager.Instance.GetRankForScore(targetTiles, completedTime); 
+        // 3. Calcola posizioni
+        int globalRank = ScoreManager.Instance.GetFakeGlobalRankForScore(targetTiles, completedTime);
+        int localRank = ScoreManager.Instance.GetRankForScore(targetTiles, completedTime);
 
-        string formattedTime = completedTime.ToString("F2", CultureInfo.InvariantCulture) + "s";
+        string formattedTime = completedTime.ToString("F2", CultureInfo.InvariantCulture);
 
-        if (globalRank == 0) 
+        // 4. Mostra New Record se è 1° al mondo (globalRank == 0) o 1° locale (localRank == 0)
+        if (globalRank == 0 || localRank == 0)
         {
-            ShowBannerWithData(worldRecordBanner, "WORLD RECORD!", formattedTime);
-        }
-        else if (globalRank >= 1 && globalRank <= 4) 
-        {
-            ShowBannerWithData(top5GlobalBanner, $"GLOBAL TOP {globalRank + 1}!", formattedTime);
-        }
-        else if (localRank == 0) 
-        {
-            ShowBannerWithData(recordBanner, "NEW BEST TIME!", formattedTime);
-        }
-        else if (localRank >= 1 && localRank <= 4) 
-        {
-            ShowBannerWithData(top5LocalBanner, $"LOCAL TOP {localRank + 1}!", formattedTime);
+            ShowBannerWithData(newRecordBanner, "NEW RECORD!", formattedTime);
         }
         else
         {
-            ShowBannerWithData(retryBanner, "TRY AGAIN!", formattedTime);
+            ShowBannerWithData(defaultBanner, "TRY AGAIN!", formattedTime);
         }
 
-        if (bannersContainer != null) bannersContainer.SetActive(true); 
+        if (bannersContainer != null) bannersContainer.SetActive(true);
     }
 
     /// <summary>
@@ -86,37 +92,34 @@ public class UIEventManager : MonoBehaviour
         FinishBanner bannerScript = bannerObj.GetComponent<FinishBanner>();
         if (bannerScript != null)
         {
-            bannerScript.SetTexts(title, score); 
+            bannerScript.SetTexts(title, score);
         }
     }
 
     private void PopulateLeaderboardUI(Transform container, List<ScoreEntry> scores)
     {
-        if (container == null) return; 
+        if (container == null) return;
 
-        LeaderboardRowUI[] rows = container.GetComponentsInChildren<LeaderboardRowUI>(true); 
+        LeaderboardRowUI[] rows = container.GetComponentsInChildren<LeaderboardRowUI>(true);
 
-        for (int i = 0; i < rows.Length; i++) 
+        for (int i = 0; i < rows.Length; i++)
         {
-            if (i < scores.Count) 
+            if (i < scores.Count)
             {
-                rows[i].gameObject.SetActive(true); 
-                rows[i].SetData(scores[i].playerName, scores[i].scoreTime); 
+                rows[i].gameObject.SetActive(true);
+                rows[i].SetData(scores[i].playerName, scores[i].scoreTime);
             }
             else
             {
-                rows[i].gameObject.SetActive(false); 
+                rows[i].gameObject.SetActive(false);
             }
         }
     }
 
     private void HideAllBanners()
     {
-        if (worldRecordBanner) worldRecordBanner.SetActive(false); 
-        if (top5GlobalBanner) top5GlobalBanner.SetActive(false); 
-        if (recordBanner) recordBanner.SetActive(false); 
-        if (top5LocalBanner) top5LocalBanner.SetActive(false); 
-        if (retryBanner) retryBanner.SetActive(false); 
-        if (bannersContainer) bannersContainer.SetActive(false); 
+        if (newRecordBanner) newRecordBanner.SetActive(false);
+        if (defaultBanner) defaultBanner.SetActive(false);
+        if (bannersContainer) bannersContainer.SetActive(false);
     }
 }

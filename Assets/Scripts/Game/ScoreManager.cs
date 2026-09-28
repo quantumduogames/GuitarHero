@@ -42,7 +42,7 @@ public class ScoreManager : MonoBehaviour
 
     // --- LOCALE ---
 
-    public List<ScoreEntry> GetTopScores(int targetTiles = 100)
+    public List<ScoreEntry> GetLocalTopScores(int targetTiles = 100)
     {
         List<ScoreEntry> scores = new List<ScoreEntry>();
         for (int i = 0; i < MaxScores; i++)
@@ -53,8 +53,16 @@ public class ScoreManager : MonoBehaviour
             if (PlayerPrefs.HasKey(timeKey))
             {
                 float time = PlayerPrefs.GetFloat(timeKey);
-                string name = PlayerPrefs.GetString(nameKey, "Player");
+                string name = PlayerPrefs.GetString(nameKey, DataConstDatabase.PlayerName);
                 scores.Add(new ScoreEntry(name, time));
+            }
+        }
+
+        if (scores.Count == 0)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                scores.Add(new ScoreEntry("NO RECORD", 99f));
             }
         }
         return scores;
@@ -67,7 +75,7 @@ public class ScoreManager : MonoBehaviour
 
     public int GetRankForScore(int targetTiles, float time)
     {
-        return GetRankInList(GetTopScores(targetTiles), time);
+        return GetRankInList(GetLocalTopScores(targetTiles), time);
     }
 
     // --- FAKE GLOBALE ---
@@ -75,7 +83,7 @@ public class ScoreManager : MonoBehaviour
     public List<ScoreEntry> GetFakeGlobalTopScores(int targetTiles = 100)
     {
         List<ScoreEntry> scores = new List<ScoreEntry>();
-        string[] fakeNames = { "SpeedDemon", "ProGamer99", "PixelKing", "Shadow", "NeonRider" };
+        string[] fakeNames = NameDatabase.Instance.GetFiveFakeGlobalName();
 
         for (int i = 0; i < MaxScores; i++)
         {
@@ -104,13 +112,14 @@ public class ScoreManager : MonoBehaviour
         return GetRankInList(GetFakeGlobalTopScores(targetTiles), time);
     }
 
+
     // --- HELPER ---
 
     private int SaveToLeaderboard(string timePrefix, string namePrefix, int targetTiles, ScoreEntry newScore)
     {
         List<ScoreEntry> scores = (timePrefix == GlobalTimeKeyPrefix)
             ? GetFakeGlobalTopScores(targetTiles)
-            : GetTopScores(targetTiles);
+            : GetLocalTopScores(targetTiles);
 
         int rankPosition = -1;
 
@@ -158,7 +167,7 @@ public class ScoreManager : MonoBehaviour
     /// </summary>
     public float GetBestTime(int targetTiles)
     {
-        List<ScoreEntry> scores = GetTopScores(targetTiles);
+        List<ScoreEntry> scores = GetLocalTopScores(targetTiles);
 
         // Se la lista contiene almeno un record (1° posto), restituisce il suo tempo
         if (scores.Count > 0)

@@ -9,14 +9,14 @@ using System.Linq;
 using System.Globalization;
 using System;
 
-public class MinigameManager : MonoBehaviour
+public class HundredBombsManager : MonoBehaviour
 {
     [Header("References")]
     public TimerManager timerManager;
     public Transform spawnPoint;
 
     [Header("Game Settings")]
-    public int targetTiles = 100;
+    public static int targetTiles = 10;
     public float initialSpawnRate = 1.5f;
     public float baseFallSpeed = 5f;
     public float destroyYThreshold = -6f;
@@ -74,8 +74,7 @@ public class MinigameManager : MonoBehaviour
         }
 
         // Attiva l'interfaccia di gioco
-        if (gameButton != null) gameButton.SetActive(true);
-        if (gameHeader != null) gameHeader.SetActive(true);
+        TurnOffGameUI(true);
 
         // Ferma eventuali routine attive e avvia il conto alla rovescia
         if (spawnCoroutine != null) StopCoroutine(spawnCoroutine);
@@ -87,8 +86,7 @@ public class MinigameManager : MonoBehaviour
     /// </summary>
     public void RestartGame()
     {
-        gameButton.SetActive(true);
-        gameHeader.SetActive(true);
+        TurnOffGameUI(true);
 
         // 1. Ferma eventuali Coroutine di spawn ancora attive
         if (spawnCoroutine != null)
@@ -422,8 +420,16 @@ public class MinigameManager : MonoBehaviour
 
         UpdateRecordText(GetBestTime());
 
+        TurnOffGameUI(false);
+
         // Notifica la UI che il gioco è finito passando il tempo impiegato
         OnGameCompleted?.Invoke(completedTime);
+    }
+
+    void TurnOffGameUI(bool active)
+    {
+        gameButton.SetActive(active);
+        gameHeader.SetActive(active);
     }
 
     void FinalExplosion()
