@@ -3846,6 +3846,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 775817854216231134, guid: ed962e35f7fa6f34f8d27aa6d19ea293, type: 3}
   m_PrefabInstance: {fileID: 448220688}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &448220691 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 9169966119468206341, guid: ed962e35f7fa6f34f8d27aa6d19ea293, type: 3}
+  m_PrefabInstance: {fileID: 448220688}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &460839623
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4440,6 +4445,7 @@ MonoBehaviour:
   bannersContainer: {fileID: 2138245772}
   newRecordBanner: {fileID: 5547487744336967703}
   defaultBanner: {fileID: 1761605542}
+  defaultPanelScript: {fileID: 0}
   localLeaderboardContainer: {fileID: 1361343816}
   localLeaderboardContainerInGame: {fileID: 1425575420}
   globalLeaderboardContainer: {fileID: 1612845250}
@@ -6263,6 +6269,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4938095755617958528, guid: 2e79f16be10fbd14f8d5ef191f8db4aa, type: 3}
   m_PrefabInstance: {fileID: 807493714}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &807493717 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 4938095755617958530, guid: 2e79f16be10fbd14f8d5ef191f8db4aa, type: 3}
+  m_PrefabInstance: {fileID: 807493714}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &846507785
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6856,6 +6867,11 @@ PrefabInstance:
 --- !u!4 &887033678 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8723508726755071871, guid: 298728fc633778c45a4591e2117cd29e, type: 3}
+  m_PrefabInstance: {fileID: 887033677}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &891183190 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2652067718098540482, guid: 298728fc633778c45a4591e2117cd29e, type: 3}
   m_PrefabInstance: {fileID: 887033677}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &896873033
@@ -10403,6 +10419,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 775817854216231134, guid: ed962e35f7fa6f34f8d27aa6d19ea293, type: 3}
   m_PrefabInstance: {fileID: 1412225271}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &1412225274 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 9169966119468206341, guid: ed962e35f7fa6f34f8d27aa6d19ea293, type: 3}
+  m_PrefabInstance: {fileID: 1412225271}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1425575419
 GameObject:
   m_ObjectHideFlags: 0
@@ -11333,6 +11354,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1567956325}
   - component: {fileID: 1567956326}
+  - component: {fileID: 1567956327}
   m_Layer: 0
   m_Name: LocalScoreManager
   m_TagString: Untagged
@@ -11367,6 +11389,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4316bcbb26d9974f9dc3fec7a8b0080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
+--- !u!114 &1567956327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567956324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4452d8afa116d734fbd1038f4787b778, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  trophyImage: {fileID: 0}
+  txtPlace: {fileID: 0}
+  txtRecordedTime: {fileID: 0}
+  rankConfigs: []
+  globalWinVFX: []
 --- !u!1001 &1575218005
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13001,6 +13040,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3869026229346647608, guid: 06d1a3fc6047a2f4e908202c2a87f287, type: 3}
   m_PrefabInstance: {fileID: 1724146237}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &1735938857 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 4938095755617958530, guid: 2e79f16be10fbd14f8d5ef191f8db4aa, type: 3}
+  m_PrefabInstance: {fileID: 473365488}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1745539201
 GameObject:
   m_ObjectHideFlags: 0
@@ -13311,7 +13355,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1761605542}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e3e1b6ff6b2afe4e8c0e656d0fffd9c, type: 3}
+  m_Script: {fileID: 11500000, guid: 72cc4bd56e2edcb46b31865a0dc387a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FinishBanner
   titleText: {fileID: 1766070305}
@@ -15509,6 +15553,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954837509}
   m_CullTransparentMesh: 1
+--- !u!198 &1962197512 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2652067718098540482, guid: 843c5c00718ee874e9ea5d9858c5f0c3, type: 3}
+  m_PrefabInstance: {fileID: 1655684985}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1990145409
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15852,6 +15901,11 @@ PrefabInstance:
 --- !u!4 &2059891912 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8723508726755071871, guid: 8fa8de43fca3fc14a8e80efd33f07735, type: 3}
+  m_PrefabInstance: {fileID: 2059891911}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2059891914 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2652067718098540482, guid: 8fa8de43fca3fc14a8e80efd33f07735, type: 3}
   m_PrefabInstance: {fileID: 2059891911}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2061293490
@@ -17393,7 +17447,7 @@ GameObject:
   - component: {fileID: 3909624368759644223}
   - component: {fileID: 804358382363385740}
   - component: {fileID: 5144371160394525194}
-  - component: {fileID: 7848412344246145213}
+  - component: {fileID: 5547487744336967704}
   m_Layer: 5
   m_Name: Panel - NewRecord
   m_TagString: Untagged
@@ -17401,6 +17455,42 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!114 &5547487744336967704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5547487744336967703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4452d8afa116d734fbd1038f4787b778, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NewRecordPanel
+  trophyImage: {fileID: 1747173924}
+  txtPlace: {fileID: 629620152}
+  txtRecordedTime: {fileID: 1245249575}
+  rankConfigs:
+  - rankSuffix: 1st
+    trophySprite: {fileID: 1002084883080041815, guid: c4546bb724f03424fa6d9fbe7656a5b6, type: 3}
+    vfxEffect: {fileID: 891183190}
+  - rankSuffix: 2nd
+    trophySprite: {fileID: 2057054892233078486, guid: 04457570d52814648936ece260b3334a, type: 3}
+    vfxEffect: {fileID: 2059891914}
+  - rankSuffix: 3rd
+    trophySprite: {fileID: -924680454672342256, guid: 646d69fa517b55343b740f1645b84a13, type: 3}
+    vfxEffect: {fileID: 1962197512}
+  - rankSuffix: 4th
+    trophySprite: {fileID: -6421659859732084023, guid: 49847dd7bb224524682636abec243a17, type: 3}
+    vfxEffect: {fileID: 0}
+  - rankSuffix: 5th
+    trophySprite: {fileID: -1561848585652481800, guid: 089ae7777554be947ae1a3b6526bb4d8, type: 3}
+    vfxEffect: {fileID: 0}
+  globalWinVFX:
+  - {fileID: 448220691}
+  - {fileID: 807493717}
+  - {fileID: 1412225274}
+  - {fileID: 1735938857}
 --- !u!222 &5597898808112206197
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -17956,20 +18046,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &7848412344246145213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5547487744336967703}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e3e1b6ff6b2afe4e8c0e656d0fffd9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FinishBanner
-  titleText: {fileID: 40547774}
-  scoreText: {fileID: 1245249575}
 --- !u!224 &7876849592223032648
 RectTransform:
   m_ObjectHideFlags: 0

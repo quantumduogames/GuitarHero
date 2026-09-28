@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class UIEventManager : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class UIEventManager : MonoBehaviour
     [Header("Banners")]
     [SerializeField] private GameObject newRecordBanner;   // Corrisponde a Panel - NewRecord
     [SerializeField] private GameObject defaultBanner;     // Corrisponde a Panel - Default
+
+
 
     [Header("Leaderboards Parent Objects")]
     [SerializeField] private Transform localLeaderboardContainer;
@@ -68,13 +71,13 @@ public class UIEventManager : MonoBehaviour
         string formattedTime = completedTime.ToString("F2", CultureInfo.InvariantCulture);
 
         // 4. Mostra New Record se è 1° al mondo (globalRank == 0) o 1° locale (localRank == 0)
-        if (globalRank == 0 || localRank == 0)
+        if (globalRank != -1) //entro la quinta posizione
         {
-            ShowBannerWithData(newRecordBanner, "NEW RECORD!", formattedTime);
+            ShowNewRecordPanel(newRecordBanner, defaultBanner, globalRank, formattedTime);
         }
         else
         {
-            ShowBannerWithData(defaultBanner, "TRY AGAIN!", formattedTime);
+            ShowDefaultPanel(defaultBanner, "TRY AGAIN!", formattedTime);
         }
 
         if (bannersContainer != null) bannersContainer.SetActive(true);
@@ -83,13 +86,32 @@ public class UIEventManager : MonoBehaviour
     /// <summary>
     /// Attiva il Gameobject del banner specificato e ne aggiorna il Titolo e lo Score tramite FinishBanner.
     /// </summary>
-    private void ShowBannerWithData(GameObject bannerObj, string title, string score)
+    private void ShowNewRecordPanel(GameObject recordPanel, GameObject defaultPanel, int globalRank, string score)
+    {
+        if (recordPanel == null) return;
+
+        recordPanel.SetActive(true);
+
+        NewRecordPanel bannerScript = recordPanel.GetComponent<NewRecordPanel>();
+        if (bannerScript != null)
+        {
+            bannerScript.SetupPanel(globalRank, score);
+        }
+
+        DefaultPanel dfPanel = defaultPanel.GetComponent<DefaultPanel>();
+        if (dfPanel != null)
+        {
+            dfPanel.SetTexts("NEW RECORD", score);
+        }
+    }
+
+    void ShowDefaultPanel(GameObject bannerObj, string title, string score)
     {
         if (bannerObj == null) return;
 
         bannerObj.SetActive(true);
 
-        FinishBanner bannerScript = bannerObj.GetComponent<FinishBanner>();
+        DefaultPanel bannerScript = bannerObj.GetComponent<DefaultPanel>();
         if (bannerScript != null)
         {
             bannerScript.SetTexts(title, score);

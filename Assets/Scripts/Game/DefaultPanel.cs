@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class FinishBanner : MonoBehaviour
+public class DefaultPanel : MonoBehaviour
 {
     [SerializeField] TMP_Text titleText;
     [SerializeField] TMP_Text scoreText;
